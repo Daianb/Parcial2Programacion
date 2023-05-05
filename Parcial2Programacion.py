@@ -75,17 +75,6 @@ class CSVReader:
         merged_data = self.select_columns(list_data)
         return merged_data
 
-    # def fit_linear_regression(self, data):
-    #     selected_cols = self.get_selected_columns([data])
-    #     coefficients = []
-    #     for cols in selected_cols:
-    #         X = data[cols[0]].values.reshape(-1, 1)
-    #         y = data[cols[1]].values.reshape(-1, 1)
-    #         reg = LinearRegression().fit(X, y)
-    #         coefficients.append((cols[0], cols[1], reg.coef_[0][0], reg.intercept_))
-    #     return coefficients
-
-    
     def fit_linear_regression(self, data):
         selected_cols = self.get_selected_columns([data])
         coefficients = []
