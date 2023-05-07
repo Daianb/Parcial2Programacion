@@ -10,12 +10,13 @@
 import os
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
 
 class CSVReader:
     """ Clase que lee archivos csv """
 
     def init(self, file_path=None):
-        """ Metodo inicial para proporcionar o encontrar la ruta del documento"""
+        """ Constructor de la clase. Inizializa la ruta del archivo """
         if file_path is None:
             self.file_path = os.getcwd()  # Si no se proporciona una ruta, usa la ruta actual
         else:
@@ -24,7 +25,7 @@ class CSVReader:
                 raise ValueError(f"La ruta proporcionada '{file_path}' no existe")
 
     def prompt_file_path(self):
-        """ Metodo que lee la ruta """
+        """ Metodo  que pide al usuario la ruta del archivo o con Enter usa la ruta actual """
         file_path = input("\nPor favor, ingrese la ruta del archivo o presione Enter para usar la ruta actual:\n")
         if file_path == "":
             self.file_path = os.getcwd()
@@ -34,7 +35,7 @@ class CSVReader:
                 raise ValueError(f"La ruta proporcionada '{file_path}' no existe")
 
     def choose_file(self):
-        """ Metodo que escoje el archivo tipo csv """
+        """ Método que lista los archivos CSV en la ruta y permite al usuario seleccionar uno o varios """
         files = os.listdir(self.file_path)
         csv_files = [f for f in files if f.endswith('.csv')]
         if not csv_files:
@@ -52,7 +53,7 @@ class CSVReader:
         return selected_files
 
     def get_selected_columns(self, data):
-        """ Metodo que muestra las columas disponibles al usuario"""
+        """ Metodo que muestra las columas disponibles en un DataFrame al usuario y permite seleccionar algunas """
         selected_cols = []
         for i, df in enumerate(data):
             print(f"\nTabla {i+1}:")
@@ -65,7 +66,7 @@ class CSVReader:
         return selected_cols
 
     def select_columns(self, data):
-        """ Metodo que seleciona las columas deseeadas por el usuario"""
+        """ Metodo que seleciona las columas deseeadas por el usuario las combina en un único DataFrame """
         selected_cols = self.get_selected_columns(data)
         selected_data = []
         for i, cols in enumerate(selected_cols):
@@ -74,7 +75,7 @@ class CSVReader:
         return merged_data
 
     def read_csv_files(self):
-        """ Metodo que unifica y lee los archivos"""
+        """ Método que unifica y lee los archivos CSV elegidos por el usuario """
         csv_files = self.choose_file()
         list_data = []
         for csv_file in csv_files:
@@ -85,7 +86,8 @@ class CSVReader:
         return merged_data
 
     def fit_linear_regression(self, data):
-        """ Metodo para creae la regresion lineal"""
+        """ Metodo para realizar la regresión lineal de las columnas numéricas en el archivo CSV y 
+        retornar los coeficientes de regresión lineal"""
         selected_cols = self.get_selected_columns([data])
         coefficients = []
         for cols in selected_cols:
@@ -99,7 +101,7 @@ class CSVReader:
         return coefficients
     
     def homogenize_values(self, data):
-        
+        """Normaliza los valores en las columnas que contienen cadenas de texto"""
         for col in data.columns:
             if data[col].dtype == 'O':  # Si la columna contiene valores tipo str
                 unique_values = data[col].str.lower().str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8').unique()
@@ -118,15 +120,15 @@ class CSVReader:
 csv_reader = CSVReader()
 csv_reader.prompt_file_path()
 data = csv_reader.read_csv_files()
-print("Datos combinados:")
+print("\nDatos combinados:")
 print(data)
 
 coefficients = csv_reader.fit_linear_regression(data)
 print("\nCoeficientes de regresión lineal:")
 for coeff in coefficients:
     print(f"{coeff[0]} vs. {coeff[1]}: {coeff[2]}")
-import matplotlib.pyplot as plt
-# Graficar los valores de la tabla
+
+# Grafica los valores de la tabla
 plt.scatter(data.iloc[:,0], data.iloc[:,1])
 for coeff in coefficients:
     x = data[coeff[0]]
@@ -134,11 +136,12 @@ for coeff in coefficients:
     reg_line = coeff[2]*x + coeff[3] # línea de regresión
     #plt.plot(x, reg_line, label=f"Regresión {coeff[0]} vs {coeff[1]}")
     plt.plot(x, reg_line, color='red', label=f"Regresión {coeff[0]} vs {coeff[1]}")
-# Agregar título y leyendas al gráfico
+
+# Agrega título y leyendas al gráfico
 plt.title('\nValores de la tabla y regresión lineal')
 plt.xlabel('\nVariable independiente')
 plt.ylabel('\nVariable dependiente')
 plt.legend()
 
-# Mostrar el gráfico
+# Muestra el gráfico
 plt.show()
